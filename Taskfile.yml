@@ -2,6 +2,10 @@
 version: '3'
 
 tasks:
+  setup:
+    desc: Initialize local development environment
+    cmds:
+      - uv sync --locked
   dev:
     desc: Start development server
     cmds:
