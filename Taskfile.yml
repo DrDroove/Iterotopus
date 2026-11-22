@@ -1,0 +1,61 @@
+
+version: '3'
+
+tasks:
+  dev:
+    desc: Start development server
+    cmds:
+      - uv run fastapi dev src/iterotopus/main.py
+
+  test:
+    desc: Run tests
+    cmds:
+      - uv run pytest -v
+
+  lint:
+    desc: Run Ruff
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: Format code
+    cmds:
+      - uv run ruff format .
+
+  migrate:
+    desc: Apply database migrations
+    cmds:
+      - uv run alembic upgrade head
+
+  docker-up:
+    desc: Start Docker services
+    cmds:
+      - docker compose up --build
+
+  docker-down:
+    desc: Stop Docker services
+    cmds:
+      - docker compose down
+
+  db-up:
+    desc: Start PostgreSQL
+    cmds:
+      - docker compose up -d db
+
+  migrate-docker:
+    desc: Apply migrations using Docker
+    cmds:
+      - docker compose run --rm api alembic upgrade head
+
+  migration-create:
+    desc: Generate a new migration
+    cmds:
+      - uv run alembic revision --autogenerate -m "{{.MESSAGE}}"
+
+  deploy:
+    desc: Build, migrate and start application
+    cmds:
+      - docker compose build api
+      - docker compose up -d db
+      - docker compose run --rm api alembic upgrade head
+      - docker compose up -d api

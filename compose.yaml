@@ -1,0 +1,57 @@
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: iterotopus-api
+
+    command:
+      - fastapi
+      - dev
+      - src/iterotopus/main.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      APP_NAME: iterotopus
+      DEBUG: "true"
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/iterotopus
+
+    volumes:
+      - ./src:/app/src
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:19
+
+    container_name: iterotopus-db
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: iterotopus
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d iterotopus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
