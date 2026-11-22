@@ -1,12 +1,10 @@
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 from iterotopus.database import get_session
 from iterotopus.main import app
-from iterotopus.models import Item
 
 
 @pytest.fixture

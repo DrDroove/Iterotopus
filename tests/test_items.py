@@ -1,4 +1,3 @@
-
 def test_create_item(client):
     response = client.post(
         "/api/v1/items/",

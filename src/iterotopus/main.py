@@ -1,6 +1,5 @@
-
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
@@ -9,7 +8,7 @@ from iterotopus.config import get_settings
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # Initialize resources here if necessary.
     yield
     # Release resources here if necessary.
