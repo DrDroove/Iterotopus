@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iterotopus — Управление задачами</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            margin: 0;
+            color: #202938;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 { margin-bottom: 8px; }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 24px;
+            box-shadow: 0 2px 12px #00000010;
+        }
+
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+        .message { margin-top: 12px; }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>Iterotopus</h1>
+    <p>Панель управления процессами оценки рисков</p>
+
+    <section class="card">
+        <h2>Создать задачу</h2>
+
+        <form id="task-form">
+            <select id="process-type" required>
+                <option value="credit">Credit Risk</option>
+                <option value="market">Market Risk</option>
+                <option value="operational">Operational Risk</option>
+            </select>
+
+            <input id="business-date" type="date" required>
+
+            <input
+                id="sources"
+                type="text"
+                placeholder="Источники через запятую"
+                required
+            >
+
+            <input id="priority" type="number" value="0">
+
+            <select id="trigger-type">
+                <option value="MANUAL">Ручной</option>
+                <option value="SCHEDULED">Автоматический</option>
+            </select>
+
+            <button type="submit">Создать</button>
+        </form>
+
+        <p id="message" class="message" role="status"></p>
+    </section>
+
+    <section class="card">
+        <h2>Список задач</h2>
+        <button id="refresh-button">Обновить</button>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Процесс</th>
+                        <th>Дата</th>
+                        <th>Источники</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="tasks-table"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+    const API_URL = "/api/v1/tasks/";
+
+    async function loadTasks() {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error("Не удалось загрузить задачи");
+        }
+
+        const tasks = await response.json();
+        const table = document.getElementById("tasks-table");
+
+        table.replaceChildren();
+
+        for (const task of tasks) {
+            const row = document.createElement("tr");
+
+            const values = [
+                task.id.slice(0, 8),
+                task.process_type,
+                task.business_date,
+                task.sources.join(", "),
+                task.status
+            ];
+
+            for (const value of values) {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            }
+
+            table.appendChild(row);
+        }
+    }
+document.getElementById("task-form")
+        .addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const sources = document.getElementById("sources")
+                .value.split(",")
+                .map(source => source.trim())
+                .filter(Boolean);
+
+            const data = {
+                process_type: document.getElementById("process-type").value,
+                business_date: document.getElementById("business-date").value,
+                sources: sources,
+                priority: Number(document.getElementById("priority").value),
+                trigger_type: document.getElementById("trigger-type").value
+            };
+
+            const message = document.getElementById("message");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ошибка создания задачи");
+                }
+
+                message.textContent = "Задача успешно создана!";
+                event.target.reset();
+                await loadTasks();
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        });
+
+    document.getElementById("refresh-button")
+        .addEventListener("click", async () => {
+            try {
+                await loadTasks();
+            } catch (error) {
+                document.getElementById("message").textContent = error.message;
+            }
+        });
+
+    loadTasks().catch(error => {
+        document.getElementById("message").textContent = error.message;
+    });
+</script>
+</body>
+</html>

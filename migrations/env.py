@@ -4,6 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
+import iterotopus.models  # noqa: F401
 from iterotopus.config import get_settings
 
 # this is the Alembic Config object, which provides

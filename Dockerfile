@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # Copy application source
-COPY . .
+COPY . /app
 
 # Install the project
 RUN --mount=type=cache,target=/root/.cache/uv \

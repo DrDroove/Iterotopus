@@ -1,9 +1,11 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
-from iterotopus.api.routes import items
+from iterotopus.api.routes import items, tasks
 from iterotopus.config import get_settings
 
 
@@ -29,3 +31,10 @@ def health():
 
 
 app.include_router(items.router, prefix="/api/v1")
+app.include_router(tasks.router, prefix="/api/v1")
+
+
+@app.get("/", include_in_schema=False)
+def frontend():
+    html_path = Path(__file__).resolve().parent / "web" / "index.html"
+    return FileResponse(html_path)
