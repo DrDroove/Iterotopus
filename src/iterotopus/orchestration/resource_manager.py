@@ -1,11 +1,10 @@
-# iterotopus/resource_manager.py
-from datetime import date
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import delete, text
 from sqlmodel import Session, select
 
-from iterotopus.models import ResourceLock, ResourcePolicy, Task
+from iterotopus.models import ResourceLock, TaskResource
 
 
 class ResourceConflict(Exception):
@@ -18,27 +17,13 @@ class TaskNotQueued(Exception):
     pass
 
 
-def build_resource_keys(
-    session: Session,
-    process_type: str,
-    business_date: date,
-    sources: list[str],
-) -> list[str]:
-    keys: list[str] = []
-    for source in sources:
-        policy = session.get(ResourcePolicy, source)
-        scope = policy.lock_scope if policy else "GLOBAL"
-        if scope == "GLOBAL":
-            keys.append(f"source:{source}")
-        else:
-            keys.append(f"source:{source}:{business_date.isoformat()}")
-    keys.append(f"output:{process_type}:{business_date.isoformat()}")
-    return sorted(keys)
-
 def get_task_resources(session: Session, task_id: UUID) -> list[str]:
-    return list(session.exec(
-        select(TaskResource.resource_key).where(TaskResource.task_id == task_id)
-    ).all())
+    return list(
+        session.exec(
+            select(TaskResource.resource_key).where(TaskResource.task_id == task_id)
+        ).all()
+    )
+
 
 def try_acquire_resources(
     session: Session,
@@ -49,17 +34,18 @@ def try_acquire_resources(
     False — conflict, nothing acquired.
     """
     resource_keys = get_task_resources(session, task_id)
+    now = datetime.now(UTC)
     try:
-        with session.begin_nested():  
+        with session.begin_nested():
             for key in sorted(resource_keys):
                 row = session.execute(
                     text("""
-                        INSERT INTO resource_locks (resource_key, task_id)
-                        VALUES (:key, :task_id)
+                        INSERT INTO resource_locks (resource_key, task_id, acquired_at)
+                        VALUES (:key, :task_id, :now)
                         ON CONFLICT (resource_key) DO NOTHING
                         RETURNING resource_key
                     """),
-                    {"key": key, "task_id": task_id},
+                    {"key": key, "task_id": task_id.hex, "now": now.isoformat()},
                 ).first()
                 if row is None:
                     raise ResourceConflict(key)
@@ -67,13 +53,14 @@ def try_acquire_resources(
             updated = session.execute(
                 text("""
                     UPDATE tasks
-                    SET status = 'RUNNING', started_at = NOW()
+                    SET status = 'RUNNING', started_at = :now
                     WHERE id = :task_id AND status = 'QUEUED'
                     RETURNING id
                 """),
-                {"task_id": task_id},
+                {"task_id": task_id.hex, "now": now.isoformat()},
             ).first()
             if updated is None:
+                print("update")
                 raise TaskNotQueued()
 
         session.commit()
@@ -81,6 +68,7 @@ def try_acquire_resources(
     except (ResourceConflict, TaskNotQueued):
         session.rollback()
         return False
+
 
 def release_resources(session: Session, task_id: UUID) -> None:
     session.exec(delete(ResourceLock).where(ResourceLock.task_id == task_id))

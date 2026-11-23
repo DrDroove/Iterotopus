@@ -1,6 +1,9 @@
 from datetime import date
+
 from sqlmodel import Session
+
 from iterotopus.models import ResourcePolicy
+
 
 class UnknownProcess(Exception):
     def __init__(self, process_type: str):
@@ -22,11 +25,6 @@ def build_resource_keys(
     business_date: date,
     sources: list[str],
 ) -> list[str]:
-    sources = session.exec(
-        select(ProcessSource.source_id).where(ProcessSource.process_type == process_type)
-    ).all()
-    if not sources:
-        raise UnknownProcess(process_type)
     keys = [get_resource_key(session, s, business_date) for s in sources]
     keys.append(f"output:{process_type}:{business_date.isoformat()}")
     return sorted(keys)

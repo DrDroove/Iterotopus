@@ -1,27 +1,110 @@
-def test_conflict_rolls_back_partial_acquire(session, task_a, task_b):
-    # task_a занимает только transactions
-    # task_b хочет [transactions, market_data]
-    keys_a = build_resource_keys(session, "credit", date(2026,11,20), ["transactions"])
-    keys_b = build_resource_keys(session, "market", date(2026,11,21), ["transactions", "market_data"])
+from uuid import UUID
 
-    assert try_acquire_resources(session, task_a.id, keys_a) is True
-    assert try_acquire_resources(session, task_b.id, keys_b) is False
+from sqlmodel import select
 
-    # ГЛАВНОЕ: market_data НЕ должен остаться захваченным task_b,
-    # хотя конфликт был на transactions
-    locks = session.execute(
-        select(ResourceLock).where(ResourceLock.task_id == task_b.id)
-    ).scalars().all()
-    assert locks == []                     # <-- вот это доказывает транзакционность
-
-    # и сам transactions всё ещё за task_a
-    assert session.get(ResourceLock, "source:transactions").task_id == task_a.id
+from iterotopus.models import ResourceLock
+from iterotopus.orchestration.resource_manager import (
+    release_resources,
+    try_acquire_resources,
+)
 
 
-def test_release_after_success(session, task):
-    keys = build_resource_keys(session, "credit", date(2026,11,20), ["transactions"])
-    assert try_acquire_resources(session, task.id, keys) is True
+def test_independet_tasks_acquire_resources(session, client):
+    response_a = client.post(
+        "/api/v1/tasks/",
+        json={
+            "process_type": "credit",
+            "business_date": "2026-11-20",
+            "sources": ["transactions"],
+            "priority": 1,
+            "trigger_type": "MANUAL",
+        },
+    )
+
+    task_a = response_a.json()
+
+    response_b = client.post(
+        "/api/v1/tasks/",
+        json={
+            "process_type": "credit",
+            "business_date": "2026-11-21",
+            "sources": ["market_data"],
+            "priority": 1,
+            "trigger_type": "MANUAL",
+        },
+    )
+
+    task_b = response_b.json()
+
+    assert try_acquire_resources(session, UUID(task_a["id"])) is True
+    assert try_acquire_resources(session, UUID(task_b["id"])) is True
+
+    assert session.get(ResourceLock, "source:transactions").task_id == UUID(
+        task_a["id"]
+    )
+    assert session.get(ResourceLock, "source:market_data").task_id == UUID(task_b["id"])
+
+
+def test_conflict_rolls_back_partial_acquire(session, client):
+    response_a = client.post(
+        "/api/v1/tasks/",
+        json={
+            "process_type": "credit",
+            "business_date": "2026-11-20",
+            "sources": ["transactions"],
+            "priority": 1,
+            "trigger_type": "MANUAL",
+        },
+    )
+
+    task_a = response_a.json()
+
+    response_b = client.post(
+        "/api/v1/tasks/",
+        json={
+            "process_type": "credit",
+            "business_date": "2026-11-21",
+            "sources": ["transactions", "market_data"],
+            "priority": 1,
+            "trigger_type": "MANUAL",
+        },
+    )
+
+    task_b = response_b.json()
+
+    assert try_acquire_resources(session, UUID(task_a["id"])) is True
+    assert try_acquire_resources(session, UUID(task_b["id"])) is False
+
+    locks = (
+        session.execute(
+            select(ResourceLock).where(ResourceLock.task_id == UUID(task_b["id"]))
+        )
+        .scalars()
+        .all()
+    )
+    assert locks == []
+
+    assert session.get(ResourceLock, "source:transactions").task_id == UUID(
+        task_a["id"]
+    )
+
+
+def test_release_after_success(session, client):
+    response_a = client.post(
+        "/api/v1/tasks/",
+        json={
+            "process_type": "credit",
+            "business_date": "2026-11-20",
+            "sources": ["transactions"],
+            "priority": 1,
+            "trigger_type": "MANUAL",
+        },
+    )
+
+    task = response_a.json()
+
+    assert try_acquire_resources(session, UUID(task["id"])) is True
     assert session.execute(select(ResourceLock)).scalars().all() != []
 
-    release_resources(session, task.id)
+    release_resources(session, UUID(task["id"]))
     assert session.execute(select(ResourceLock)).scalars().all() == []

@@ -4,7 +4,7 @@ import logging
 
 from sqlmodel import Session, select
 
-from iterotopus.database import engine
+from iterotopus import database
 from iterotopus.models import Task
 from iterotopus.orchestration.orchestrator import execute_task
 from iterotopus.orchestration.resource_manager import try_acquire_resources
@@ -32,10 +32,9 @@ class Scheduler:
             except Exception:
                 logger.exception("scheduler tick failed")
 
-            # ждём либо таймаут, либо wake_up()
             try:
                 await asyncio.wait_for(self._wake.wait(), timeout=POLL_INTERVAL)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
             finally:
                 self._wake.clear()
@@ -53,7 +52,7 @@ class Scheduler:
         if len(self._running_tasks) >= MAX_CONCURRENT:
             return
 
-        with Session(engine) as session:
+        with Session(database.engine) as session:
             queued = session.exec(
                 select(Task)
                 .where(Task.status == "QUEUED")
@@ -66,11 +65,9 @@ class Scheduler:
 
                 acquired = try_acquire_resources(session, task.id)
                 if not acquired:
-                    continue          
+                    continue
 
-                atask = asyncio.create_task(
-                    self._run_and_track(task.id)
-                )
+                atask = asyncio.create_task(self._run_and_track(task.id))
                 self._running_tasks.add(atask)
                 atask.add_done_callback(self._running_tasks.discard)
 
