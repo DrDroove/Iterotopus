@@ -7,6 +7,7 @@ from iterotopus.database import SessionDep
 from iterotopus.models.resource_lock import ResourceLock
 from iterotopus.models.task import Task
 from iterotopus.models.task_resource import TaskResource
+from iterotopus.resource_keys import build_resource_keys
 from iterotopus.schemas.task import TaskCreate, TaskRead, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -48,21 +49,17 @@ def create_task(data: TaskCreate, session: SessionDep):
     task = Task(**data.model_dump(exclude={"sources"}))
 
     session.add(task)
+    session.flush()
 
-    for source in sources:
+    for resource_key in build_resource_keys(
+        session, task.process_type, task.business_date, sources
+    ):
         session.add(
             TaskResource(
                 task_id=task.id,
-                resource_key=f"source:{source}",
+                resource_key=(resource_key),
             )
         )
-
-    session.add(
-        TaskResource(
-            task_id=task.id,
-            resource_key=(f"output:{task.process_type}:{task.business_date}"),
-        )
-    )
 
     session.commit()
     session.refresh(task)
