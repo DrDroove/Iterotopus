@@ -1,0 +1,535 @@
+:root {
+    --background: #0b1120;
+    --sidebar: #111827;
+    --panel: #151e2e;
+    --border: #263246;
+
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+    --red: #f87171;
+
+    --sidebar-width: 240px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+h1, h2, p {
+    margin: 0;
+}
+
+/* Основная структура */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+
+    display: flex;
+    flex-direction: column;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    padding: 24px 14px;
+}
+
+.workspace {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-width: 0;
+}
+
+/* Логотип */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px;
+    margin-bottom: 48px;
+}
+
+.brand-icon {
+    display: grid;
+    place-items: center;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 10px;
+    background: var(--primary);
+
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.brand-description {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+/* Навигация */
+
+.nav-label {
+    color: #64748b;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 0 12px;
+    margin-bottom: 12px;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 13px 14px;
+    border: none;
+    border-radius: 8px;
+
+    color: var(--muted);
+    background: transparent;
+
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.nav-item:hover {
+    background: #1e293b;
+    color: var(--text);
+}
+
+.nav-item.active {
+    background: #252c50;
+    color: #c7d2fe;
+    box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.nav-icon {
+    font-size: 19px;
+    width: 22px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: auto;
+    padding: 16px 12px 0;
+
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.connection-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--muted);
+}
+
+.connection-dot.online {
+    background: var(--green);
+    box-shadow: 0 0 10px #4ade8040;
+}
+
+.connection-dot.offline {
+    background: var(--red);
+}
+
+/* Верхняя панель */
+
+.topbar {
+    min-height: 64px;
+    padding: 16px 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+#current-page {
+    color: var(--text);
+}
+
+.content {
+    padding: 32px;
+}
+
+/* Страницы */
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    font-size: 30px;
+    font-weight: 650;
+}
+
+.page-header p {
+    color: var(--muted);
+    margin-top: 8px;
+}
+
+/* Кнопки */
+
+.primary-button,
+.secondary-button {
+    padding: 11px 18px;
+    border-radius: 7px;
+    transition: background 0.15s;
+}
+
+.primary-button {
+    background: var(--primary);
+    color: white;
+    border: 1px solid transparent;
+}
+
+.primary-button:hover {
+    background: var(--primary-hover);
+}
+
+.secondary-button {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.secondary-button:hover {
+    background: #263246;
+    color: var(--text);
+}
+
+/* Статистика */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    padding: 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-value {
+    font-size: 34px;
+    font-weight: 650;
+    margin: 12px 0;
+}
+
+.stat-description {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.green { color: var(--green); }
+.blue { color: var(--blue); }
+.yellow { color: var(--yellow); }
+.red { color: var(--red); }
+
+/* Панели */
+
+.panel {
+    padding: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.panel h2 {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* Таблицы */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+th {
+    padding: 14px;
+    background: #1e293b;
+    color: var(--muted);
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+td {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover {
+    background: #1b2638;
+}
+
+.task-id {
+    font-family: monospace;
+    color: var(--muted);
+}
+
+/* Статусы */
+
+.status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-queued {
+    color: var(--yellow);
+    background: #fbbf2415;
+}
+
+.status-running {
+    color: var(--blue);
+    background: #60a5fa15;
+}
+
+.status-completed {
+    color: var(--green);
+    background: #4ade8015;
+}
+
+.status-failed {
+    color: var(--red);
+    background: #f8717115;
+}
+
+.status-cancelled,
+.status-unknown {
+    color: var(--muted);
+    background: #94a3b815;
+}
+
+/* Формы */
+
+#task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 550px;
+    margin-top: 24px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-field label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+
+    background: var(--background);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 7px;
+
+    color-scheme: dark;
+}
+
+input:focus,
+select:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
+.message {
+    margin-top: 16px;
+    color: var(--muted);
+}
+
+.message.success {
+    color: var(--green);
+}
+
+.message.error {
+    color: var(--red);
+}
+
+.placeholder,
+.empty-state {
+    color: var(--muted);
+    text-align: center;
+    padding: 48px 16px;
+}
+
+/* Адаптация под небольшие экраны */
+
+@media (max-width: 850px) {
+    :root {
+        --sidebar-width: 185px;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .brand {
+        padding: 0;
+    }
+
+    .brand-name {
+        font-size: 16px;
+    }
+
+    .brand-description {
+        font-size: 10px;
+    }
+
+    .topbar {
+        padding: 16px 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .app-layout {
+        display: block;
+    }
+
+    .sidebar {
+        position: static;
+        width: 100%;
+    }
+
+    .workspace {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .navigation {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .brand {
+        margin-bottom: 20px;
+    }
+
+    .sidebar-footer {
+        margin-top: 20px;
+    }
+
+    .topbar > span {
+        display: none;
+    }
+
+    .page-header {
+        flex-wrap: wrap;
+    }
+}
