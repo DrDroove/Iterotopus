@@ -6,6 +6,7 @@ import asyncio
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from iterotopus.api.routes import items, tasks
 from iterotopus.config import get_settings
@@ -36,6 +37,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+WEB_DIR = Path(__file__).resolve().parent / "web"
+
+app.mount(
+    "/static",
+    StaticFiles(directory=WEB_DIR),
+    name="static",
+)
+
 
 @app.get("/health", tags=["health"])
 def health():
@@ -48,5 +57,4 @@ app.include_router(tasks.router, prefix="/api/v1")
 
 @app.get("/", include_in_schema=False)
 def frontend():
-    html_path = Path(__file__).resolve().parent / "web" / "index.html"
-    return FileResponse(html_path)
+    return FileResponse(WEB_DIR / "index.html")
