@@ -1,5 +1,6 @@
 
 import { loadDashboard } from "./dashboard.js";
+import { loadQueue } from "./queue.js";
 import "./builder.js";
 
 const PAGE_NAMES = {
@@ -39,6 +40,9 @@ function showPage(pageName) {
 
     if (pageName === "dashboard") {
         refreshDashboard();
+    }
+    if (pageName === "queue") {
+    refreshQueue();
     }
 }
 
@@ -83,6 +87,17 @@ async function refreshDashboard() {
     }
 }
 
+async function refreshQueue() {
+    try {
+        await loadQueue();
+        setConnection(true);
+
+    } catch (error) {
+        setConnection(false);
+        console.error(error);
+    }
+}
+
 // События приложения
 
 document.addEventListener(
@@ -95,6 +110,10 @@ document.addEventListener(
 document.getElementById("refresh-button")
     .addEventListener("click", refreshDashboard);
 
+
+document.getElementById("queue-refresh")
+    .addEventListener("click", refreshQueue);
+    
 // Инициализация приложения
 
 showPage("dashboard");

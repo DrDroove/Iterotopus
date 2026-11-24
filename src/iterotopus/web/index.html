@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/builder.css">
+    <link rel="stylesheet" href="/static/css/queue.css">
 </head>
 
 <body>
@@ -401,19 +402,119 @@
             </section>
 
 
+            
             <!-- QUEUE -->
             <section id="page-queue" class="page">
 
                 <div class="page-header">
                     <div>
-                        <h1>Queue</h1>
-                        <p>Текущая очередь выполнения</p>
+                        <h1>Task Queue</h1>
+                        <p>Monitor active calculation processes</p>
                     </div>
+
+                    <button
+                        id="queue-refresh"
+                        class="secondary-button"
+                    >
+                        Refresh
+                    </button>
                 </div>
 
-                <div class="panel placeholder">
-                    Раздел очереди будет реализован следующим этапом.
+                <!-- Статистика очереди -->
+                <div class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-label">Active tasks</div>
+                        <div class="stat-value" id="queue-total">—</div>
+                        <div class="stat-description">Всего активных задач</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Running</div>
+                        <div class="stat-value blue" id="queue-running">—</div>
+                        <div class="stat-description">Выполняются</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Waiting</div>
+                        <div class="stat-value yellow" id="queue-waiting">—</div>
+                        <div class="stat-description">Ожидают выполнения</div>
+                    </article>
+
                 </div>
+
+                <!-- Выполняющиеся задачи -->
+                <div class="panel queue-panel">
+
+                    <div class="panel-header">
+                        <div class="queue-panel-title">
+                            <span class="queue-indicator running"></span>
+                            <h2>Running tasks</h2>
+                        </div>
+
+                        <span
+                            id="running-count"
+                            class="queue-count"
+                        ></span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Priority</th>
+                                    <th>Started at</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="running-table"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- Ожидающие задачи -->
+                <div class="panel queue-panel">
+
+                    <div class="panel-header">
+                        <div class="queue-panel-title">
+                            <span class="queue-indicator waiting"></span>
+                            <h2>Waiting queue</h2>
+                        </div>
+
+                        <span
+                            id="waiting-count"
+                            class="queue-count"
+                        ></span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Priority</th>
+                                    <th>Created at</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="waiting-table"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <p id="queue-message" class="message" role="status"></p>
 
             </section>
 
