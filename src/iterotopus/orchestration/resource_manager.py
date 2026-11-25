@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import delete, text
 from sqlmodel import Session, select
 
-from iterotopus.models import ResourceLock, TaskResource
+from iterotopus.models import ResourceLock, Task, TaskResource
 
 
 class ResourceConflict(Exception):
@@ -31,22 +31,48 @@ def try_acquire_resources(
 ) -> bool:
     """
     True  — task RUNNING, resources acquired.
-    False — conflict, nothing acquired.
+    False — conflict or task unavailable.
     """
-    resource_keys = get_task_resources(session, task_id)
-    now = datetime.now(UTC)
+
     try:
         with session.begin_nested():
+            # Блокируем строку задачи
+            task = session.exec(
+                select(Task.id)
+                .where(
+                    Task.id == task_id,
+                    Task.status == "QUEUED",
+                )
+                .with_for_update()
+            ).first()
+
+            if task is None:
+                raise TaskNotQueued()
+
+            # Читаем ресурсы после блокировки задачи
+            resource_keys = get_task_resources(
+                session,
+                task_id,
+            )
+
+            now = datetime.now(UTC)
+
             for key in sorted(resource_keys):
                 row = session.execute(
                     text("""
-                        INSERT INTO resource_locks (resource_key, task_id, acquired_at)
+                        INSERT INTO resource_locks
+                            (resource_key, task_id, acquired_at)
                         VALUES (:key, :task_id, :now)
                         ON CONFLICT (resource_key) DO NOTHING
                         RETURNING resource_key
                     """),
-                    {"key": key, "task_id": task_id.hex, "now": now.isoformat()},
+                    {
+                        "key": key,
+                        "task_id": task_id.hex,
+                        "now": now.isoformat(),
+                    },
                 ).first()
+
                 if row is None:
                     raise ResourceConflict(key)
 
@@ -57,14 +83,18 @@ def try_acquire_resources(
                     WHERE id = :task_id AND status = 'QUEUED'
                     RETURNING id
                 """),
-                {"task_id": task_id.hex, "now": now.isoformat()},
+                {
+                    "task_id": task_id.hex,
+                    "now": now.isoformat(),
+                },
             ).first()
+
             if updated is None:
-                print("update")
                 raise TaskNotQueued()
 
         session.commit()
         return True
+
     except (ResourceConflict, TaskNotQueued):
         session.rollback()
         return False

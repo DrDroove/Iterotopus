@@ -335,3 +335,111 @@ tr[data-task-id]:focus-visible {
         animation: none;
     }
 }
+
+/* Task management */
+
+.details-management {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* Edit form */
+
+.details-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.details-edit-form[hidden],
+.details-management button[hidden] {
+    display: none;
+}
+
+.details-edit-form h2 {
+    font-size: 22px;
+}
+
+.edit-description {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.edit-sources {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.edit-source-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px;
+
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.edit-source-option:hover {
+    border-color: var(--primary);
+}
+
+.edit-source-option input {
+    width: 18px;
+    height: 18px;
+
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.edit-source-option:has(input:checked) {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+/* Delete task */
+
+.danger-button {
+    padding: 10px 16px;
+
+    background: rgba(248, 113, 113, 0.08);
+    color: var(--red);
+
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: 8px;
+
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: background 0.15s;
+}
+
+.danger-button:hover {
+    background: rgba(248, 113, 113, 0.18);
+}
+
+.danger-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.danger-button[hidden] {
+    display: none;
+}

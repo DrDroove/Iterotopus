@@ -145,4 +145,14 @@ document.addEventListener("keydown", event => {
     openTaskDetails(event.target.dataset.taskId);
 }, true);
 
+document.addEventListener("task:updated", () => {
+    refreshDashboard();
+    refreshQueue();
+});
+
+document.addEventListener("task:deleted", () => {
+    refreshDashboard();
+    refreshQueue();
+});
+
 showPage("dashboard");

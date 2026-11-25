@@ -583,8 +583,95 @@
 
         <p id="details-message" class="message" role="status"></p>
 
-        <div id="details-content" hidden>
+        <form id="details-edit-form" class="details-edit-form" hidden>
 
+            <h2>Edit Task</h2>
+
+            <p class="edit-description">
+                Modify the configuration of a queued task.
+            </p>
+
+            <label class="form-field">
+                Process type
+
+                <select id="edit-process" required>
+                    <option value="credit">Credit Risks</option>
+                    <option value="market">Market Risks</option>
+                    <option value="operational">Operational Risks</option>
+                </select>
+            </label>
+
+            <label class="form-field">
+                Business date
+
+                <input id="edit-date" type="date" required>
+            </label>
+
+            <label class="form-field">
+                Priority
+
+                <input id="edit-priority" type="number" step="1" required>
+            </label>
+
+            <label class="form-field">
+                Trigger type
+
+                <select id="edit-trigger" required>
+                    <option value="MANUAL">Manual</option>
+                    <option value="SCHEDULED">Scheduled</option>
+                </select>
+            </label>
+
+            <div class="form-field">
+                Data sources
+
+                <div id="edit-sources" class="edit-sources"></div>
+            </div>
+
+            <div class="edit-actions">
+
+                <button
+                    type="button"
+                    id="edit-cancel"
+                    class="secondary-button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="edit-save"
+                    class="primary-button"
+                >
+                    Save changes
+                </button>
+
+            </div>
+
+        </form>
+
+        <div id="details-content" hidden>
+            <div class="details-management">
+
+                <button
+                    type="button"
+                    id="details-delete"
+                    class="danger-button"
+                    hidden
+                >
+                    Delete task
+                </button>
+
+                <button
+                    type="button"
+                    id="details-edit"
+                    class="primary-button"
+                    hidden
+                >
+                    Edit task
+                </button>
+
+            </div>
             <!-- Основная информация -->
             <section class="details-section">
 

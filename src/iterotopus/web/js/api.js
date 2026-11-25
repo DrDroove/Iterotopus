@@ -18,7 +18,10 @@ async function request(url, options = {}) {
             // Ответ сервера не содержит JSON.
         }
 
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+
+        throw error;
     }
 
     if (response.status === 204) {

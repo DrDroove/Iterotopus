@@ -13,20 +13,22 @@ from iterotopus.schemas.task import TaskCreate, TaskRead, TaskUpdate
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
+def get_source_names(resources: list[TaskResource]) -> list[str]:
+    return sorted(
+        resource.resource_key.split(":")[1]
+        for resource in resources
+        if resource.resource_key.startswith("source:")
+    )
+
+
 def to_task_read(task: Task, session: SessionDep) -> TaskRead:
     resources = session.exec(
         select(TaskResource).where(TaskResource.task_id == task.id)
     ).all()
 
-    sources = sorted(
-        resource.resource_key.removeprefix("source:")
-        for resource in resources
-        if resource.resource_key.startswith("source:")
-    )
-
     return TaskRead(
         **task.model_dump(),
-        sources=sources,
+        sources=get_source_names(resources),
     )
 
 
@@ -93,7 +95,9 @@ def update_task(
     data: TaskUpdate,
     session: SessionDep,
 ):
-    task = session.get(Task, task_id)
+    task = session.exec(
+        select(Task).where(Task.id == task_id).with_for_update()
+    ).first()
 
     if task is None:
         raise HTTPException(
@@ -108,13 +112,14 @@ def update_task(
         )
 
     changes = data.model_dump(exclude_unset=True)
-    sources = changes.pop("sources", None)
 
     if any(value is None for value in changes.values()):
         raise HTTPException(
             status_code=422,
             detail="Task fields cannot be null",
         )
+
+    sources = changes.pop("sources", None)
 
     if sources is not None:
         sources = [source.strip() for source in sources]
@@ -129,41 +134,37 @@ def update_task(
                 detail="Invalid or duplicate sources",
             )
 
+    rebuild_resources = (
+        sources is not None or "process_type" in changes or "business_date" in changes
+    )
+
     task.sqlmodel_update(changes)
 
-    # Если изменились источники, дата или тип процесса,
-    # пересоздаём связанные ресурсные ключи.
-    if changes or sources is not None:
+    if rebuild_resources:
         existing_resources = session.exec(
             select(TaskResource).where(TaskResource.task_id == task_id)
         ).all()
 
         if sources is None:
-            sources = [
-                resource.resource_key.removeprefix("source:")
-                for resource in existing_resources
-                if resource.resource_key.startswith("source:")
-            ]
+            sources = get_source_names(existing_resources)
 
         for resource in existing_resources:
             session.delete(resource)
 
         session.flush()
 
-        for source in sources:
+        for resource_key in build_resource_keys(
+            session,
+            task.process_type,
+            task.business_date,
+            sources,
+        ):
             session.add(
                 TaskResource(
                     task_id=task_id,
-                    resource_key=f"source:{source}",
+                    resource_key=resource_key,
                 )
             )
-
-        session.add(
-            TaskResource(
-                task_id=task_id,
-                resource_key=(f"output:{task.process_type}:{task.business_date}"),
-            )
-        )
 
     session.add(task)
     session.commit()
@@ -174,7 +175,9 @@ def update_task(
 
 @router.delete("/{task_id}", status_code=204)
 def delete_task(task_id: UUID, session: SessionDep):
-    task = session.get(Task, task_id)
+    task = session.exec(
+        select(Task).where(Task.id == task_id).with_for_update()
+    ).first()
 
     if task is None:
         raise HTTPException(
