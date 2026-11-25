@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/builder.css">
     <link rel="stylesheet" href="/static/css/queue.css">
+    <link rel="stylesheet" href="/static/css/task-details.css">
 </head>
 
 <body>
@@ -555,6 +556,137 @@
     </main>
 
 </div>
+
+<!-- TASK DETAILS -->
+<dialog
+    id="task-details"
+    class="task-details"
+    aria-labelledby="details-title"
+>
+    <header class="details-header">
+        <div>
+            <h2 id="details-title">Task Details</h2>
+            <p>Calculation process information</p>
+        </div>
+
+        <button
+            type="button"
+            id="details-close"
+            class="details-close"
+            aria-label="Close task details"
+        >
+            ×
+        </button>
+    </header>
+
+    <div class="details-body">
+
+        <p id="details-message" class="message" role="status"></p>
+
+        <div id="details-content" hidden>
+
+            <!-- Основная информация -->
+            <section class="details-section">
+
+                <div class="details-summary">
+                    <h2 id="details-process-name">—</h2>
+                    <span id="details-status" class="status">—</span>
+                </div>
+
+                <div class="details-field">
+                    <span class="details-label">Task ID</span>
+                    <span id="details-id" class="details-id">—</span>
+                </div>
+
+                <div class="details-grid">
+
+                    <div class="details-field">
+                        <span class="details-label">Business date</span>
+                        <strong id="details-date">—</strong>
+                    </div>
+
+                    <div class="details-field">
+                        <span class="details-label">Priority</span>
+                        <strong id="details-priority">—</strong>
+                    </div>
+
+                    <div class="details-field">
+                        <span class="details-label">Trigger type</span>
+                        <strong id="details-trigger">—</strong>
+                    </div>
+
+                    <div class="details-field">
+                        <span class="details-label">Process type</span>
+                        <strong id="details-process">—</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Источники данных -->
+            <section class="details-section">
+
+                <h3>Data Sources</h3>
+
+                <div
+                    id="details-sources"
+                    class="details-sources"
+                ></div>
+
+            </section>
+
+            <!-- Время выполнения -->
+            <section class="details-section">
+
+                <h3>Execution Timeline</h3>
+
+                <div
+                    id="details-timeline"
+                    class="details-timeline"
+                ></div>
+
+            </section>
+
+            <!-- Информация об ошибке -->
+            <section
+                id="details-error-section"
+                class="details-section"
+                hidden
+            >
+                <h3>Execution Error</h3>
+
+                <div
+                    id="details-error"
+                    class="details-error"
+                ></div>
+            </section>
+
+        </div>
+
+    </div>
+
+    <footer class="details-footer">
+
+        <button
+            type="button"
+            id="details-refresh"
+            class="secondary-button"
+        >
+            Refresh
+        </button>
+
+        <button
+            type="button"
+            id="details-close-footer"
+            class="primary-button"
+        >
+            Close
+        </button>
+
+    </footer>
+
+</dialog>
 
 <script type="module" src="/static/js/app.js"></script>
 

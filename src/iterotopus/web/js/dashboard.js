@@ -102,6 +102,9 @@ function renderRecentTasks(tasks) {
     for (const task of recentTasks) {
         const row = document.createElement("tr");
 
+        row.dataset.taskId = task.id;
+        row.tabIndex = 0;
+
         row.appendChild(
             createCell(task.id.slice(0, 8), "task-id")
         );

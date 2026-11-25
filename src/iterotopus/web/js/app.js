@@ -1,6 +1,6 @@
-
 import { loadDashboard } from "./dashboard.js";
 import { loadQueue } from "./queue.js";
+import { openTaskDetails } from "./task-details.js";
 import "./builder.js";
 
 const PAGE_NAMES = {
@@ -115,5 +115,34 @@ document.getElementById("queue-refresh")
     .addEventListener("click", refreshQueue);
     
 // Инициализация приложения
+
+
+// Открытие карточки задачи
+
+document.addEventListener("click", event => {
+    const row = event.target.closest("tr[data-task-id]");
+
+    if (!row) {
+        return;
+    }
+
+    openTaskDetails(row.dataset.taskId);
+});
+
+// Открытие карточки с клавиатуры
+
+document.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") {
+        return;
+    }
+
+    if (!event.target.matches("tr[data-task-id]")) {
+        return;
+    }
+
+    event.preventDefault();
+
+    openTaskDetails(event.target.dataset.taskId);
+}, true);
 
 showPage("dashboard");

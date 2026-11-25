@@ -119,6 +119,8 @@ function renderRunningTasks(tasks) {
 
         row.dataset.taskId = task.id;
 
+        row.tabIndex = 0;
+
         row.append(
             createCell(
                 task.id.slice(0, 8),
@@ -170,6 +172,8 @@ function renderWaitingTasks(tasks) {
         const row = document.createElement("tr");
 
         row.dataset.taskId = task.id;
+        
+        row.tabIndex = 0;
 
         row.append(
             createCell(
