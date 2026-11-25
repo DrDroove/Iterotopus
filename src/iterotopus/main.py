@@ -1,8 +1,7 @@
+import asyncio
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-
-import asyncio
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -17,9 +16,9 @@ from iterotopus.orchestration.scheduler import Scheduler
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # Initialize resources here if necessary.
     scheduler = Scheduler()
-    
+
     scheduler_task = asyncio.create_task(scheduler.run())
-    
+
     app.state.scheduler = scheduler
     app.state.scheduler_task = scheduler_task
 
@@ -28,6 +27,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
     scheduler.stop()
     await scheduler_task
+
 
 settings = get_settings()
 
