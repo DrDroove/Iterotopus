@@ -131,10 +131,6 @@
 
                     <div class="panel-header">
                         <h2>Recent tasks</h2>
-
-                        <button id="refresh-button" class="secondary-button">
-                            Refresh
-                        </button>
                     </div>
 
                     <div class="table-wrapper">
@@ -412,13 +408,6 @@
                         <h1>Task Queue</h1>
                         <p>Monitor active calculation processes</p>
                     </div>
-
-                    <button
-                        id="queue-refresh"
-                        class="secondary-button"
-                    >
-                        Refresh
-                    </button>
                 </div>
 
                 <!-- Статистика очереди -->
@@ -506,6 +495,7 @@
                                     <th>Priority</th>
                                     <th>Created at</th>
                                     <th>Status</th>
+                                    <th>Blocked by</th>
                                 </tr>
                             </thead>
 
@@ -527,10 +517,38 @@
                         <h1>History</h1>
                         <p>История выполнения задач</p>
                     </div>
+
+                    <div class="history-filters" style="display: flex; gap: 8px;">
+                        <button type="button" class="secondary-button active" data-history-filter="ALL">Все</button>
+                        <button type="button" class="secondary-button" data-history-filter="COMPLETED">Completed</button>
+                        <button type="button" class="secondary-button" data-history-filter="FAILED">Failed</button>
+                    </div>
                 </div>
 
-                <div class="panel placeholder">
-                    Здесь будет отображаться история задач.
+                <div id="history-message" class="message"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Completed & Failed tasks</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Trigger</th>
+                                    <th>Duration</th>
+                                    <th>Finished at</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table"></tbody>
+                        </table>
+                    </div>
                 </div>
 
             </section>
@@ -545,9 +563,30 @@
                     </div>
                 </div>
 
-                <div class="panel placeholder">
-                    Здесь будут отображаться захваченные ресурсы.
+                <div id="resources-message" class="message"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Data sources status</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Resources</th>
+                                    <th>Status</th>
+                                    <th>Owner</th>
+                                    <th>Waiting tasks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resources-table"></tbody>
+                        </table>
+                    </div>
                 </div>
+
+            </section>
+
 
             </section>
 

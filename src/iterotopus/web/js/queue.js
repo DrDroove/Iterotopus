@@ -6,6 +6,10 @@ const PROCESS_NAMES = {
     operational: "Operational Risks"
 };
 
+const QUEUE_POLL_MS = 1000;
+let queueTimer = null;
+let isQueueLoading = false;
+
 function formatDateTime(value) {
     if (!value) {
         return "—";
@@ -18,6 +22,43 @@ function formatDateTime(value) {
     }
 
     return date.toLocaleString("ru-RU");
+}
+
+function getBlockReason(queuedTask, runningTasks) {
+    // 1. Ищем пересечение по источнику И дате расчета
+    for (const active of runningTasks) {
+        if (active.business_date === queuedTask.business_date) {
+            const sharedSources = queuedTask.sources.filter((src) =>
+                active.sources.includes(src)
+            );
+            if (sharedSources.length > 0) {
+                const procName = PROCESS_NAMES[active.process_type] ?? active.process_type;
+                return `Занят: ${sharedSources.join(", ")} (${procName})`;
+            }
+        }
+    }
+
+    // 2. Ищем пересечение только по источнику (если блокировка на весь источник)
+    for (const active of runningTasks) {
+        const sharedSources = queuedTask.sources.filter((src) =>
+            active.sources.includes(src)
+        );
+        if (sharedSources.length > 0) {
+            const procName = PROCESS_NAMES[active.process_type] ?? active.process_type;
+            return `Занят источник: ${sharedSources.join(", ")} (${procName})`;
+        }
+    }
+
+    // 3. Ищем пересечение по типу процесса
+    const sameProcess = runningTasks.find(
+        (active) => active.process_type === queuedTask.process_type
+    );
+    if (sameProcess) {
+        const procName = PROCESS_NAMES[sameProcess.process_type] ?? sameProcess.process_type;
+        return `Занят процесс: ${procName}`;
+    }
+
+    return "Ожидает слот выполнения";
 }
 
 function createCell(value, className = "") {
@@ -54,9 +95,6 @@ function renderEmptyTable(table, columns, message) {
     table.appendChild(row);
 }
 
-
-// Если приоритеты различаются, выше будет задача с большим приоритетом. 
-// Если они одинаковые, выше будет задача, созданная раньше.
 function splitTasks(tasks) {
     const running = tasks
         .filter(task => task.status === "RUNNING")
@@ -118,7 +156,6 @@ function renderRunningTasks(tasks) {
         const row = document.createElement("tr");
 
         row.dataset.taskId = task.id;
-
         row.tabIndex = 0;
 
         row.append(
@@ -153,27 +190,31 @@ function renderRunningTasks(tasks) {
     }
 }
 
-function renderWaitingTasks(tasks) {
+function renderWaitingTasks(waitingTasks, runningTasks) {
     const table = document.getElementById("waiting-table");
 
     table.replaceChildren();
 
-    if (tasks.length === 0) {
+    if (waitingTasks.length === 0) {
         renderEmptyTable(
             table,
-            8,
+            9,
             "Очередь пуста"
         );
 
         return;
     }
 
-    tasks.forEach((task, index) => {
+    waitingTasks.forEach((task, index) => {
         const row = document.createElement("tr");
 
         row.dataset.taskId = task.id;
-        
         row.tabIndex = 0;
+
+        const reasonCell = createCell(
+            getBlockReason(task, runningTasks),
+            "queue-time"
+        );
 
         row.append(
             createCell(
@@ -205,15 +246,38 @@ function renderWaitingTasks(tasks) {
                 "queue-time"
             ),
 
-            createStatusCell(task.status)
+            createStatusCell(task.status),
+
+            reasonCell
         );
 
         table.appendChild(row);
     });
 }
 
+function isQueuePageActive() {
+    const table = document.getElementById("waiting-table");
+    return Boolean(table && !document.hidden && table.offsetParent !== null);
+}
+
+function scheduleQueueRefresh() {
+    clearTimeout(queueTimer);
+    queueTimer = setTimeout(async () => {
+        if (isQueuePageActive()) {
+            try {
+                await loadQueue();
+            } catch {}
+        } else {
+            scheduleQueueRefresh();
+        }
+    }, QUEUE_POLL_MS);
+}
+
 export async function loadQueue() {
+    if (isQueueLoading) return;
+
     const message = document.getElementById("queue-message");
+    isQueueLoading = true;
 
     try {
         const tasks = await getTasks();
@@ -223,7 +287,7 @@ export async function loadQueue() {
         renderStatistics(running, waiting);
 
         renderRunningTasks(running);
-        renderWaitingTasks(waiting);
+        renderWaitingTasks(waiting, running);
 
         message.textContent = "";
         message.className = "message";
@@ -233,5 +297,8 @@ export async function loadQueue() {
         message.className = "message error";
 
         throw error;
+    } finally {
+        isQueueLoading = false;
+        scheduleQueueRefresh();
     }
 }
