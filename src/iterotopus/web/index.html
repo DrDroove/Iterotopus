@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iterotopus — Risk Orchestration</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/builder.css">
+    <link rel="stylesheet" href="/static/css/queue.css">
+    <link rel="stylesheet" href="/static/css/task-details.css">
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- Боковое меню -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">I</div>
+
+            <div>
+                <div class="brand-name">Iterotopus</div>
+                <div class="brand-description">Risk Orchestration</div>
+            </div>
+        </div>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <nav class="navigation">
+
+            <button class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </button>
+
+            <button class="nav-item" data-page="builder">
+                <span class="nav-icon">⊞</span>
+                Task Builder
+            </button>
+
+            <button class="nav-item" data-page="queue">
+                <span class="nav-icon">☰</span>
+                Queue
+            </button>
+
+            <button class="nav-item" data-page="history">
+                <span class="nav-icon">◷</span>
+                History
+            </button>
+
+            <button class="nav-item" data-page="resources">
+                <span class="nav-icon">◇</span>
+                Resources
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <span id="connection-dot" class="connection-dot"></span>
+            <span id="connection-text">Connecting...</span>
+        </div>
+
+    </aside>
+
+    <!-- Основная рабочая область -->
+    <main class="workspace">
+
+        <header class="topbar">
+            <div>
+                Workspace /
+                <span id="current-page">Dashboard</span>
+            </div>
+
+            <span>Risk Management System</span>
+        </header>
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section id="page-dashboard" class="page active">
+
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Обзор состояния вычислительных процессов</p>
+                    </div>
+
+                    <button class="primary-button" data-go="builder">
+                        + New task
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-label">Total tasks</div>
+                        <div class="stat-value" id="stat-total">—</div>
+                        <div class="stat-description">Всего задач</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Running</div>
+                        <div class="stat-value blue" id="stat-running">—</div>
+                        <div class="stat-description">Выполняются</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Queued</div>
+                        <div class="stat-value yellow" id="stat-queued">—</div>
+                        <div class="stat-description">Ожидают выполнения</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value green" id="stat-completed">—</div>
+                        <div class="stat-description">Успешно завершены</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Failed</div>
+                        <div class="stat-value red" id="stat-failed">—</div>
+                        <div class="stat-description">Завершены с ошибкой</div>
+                    </article>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h2>Recent tasks</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tasks-table"></tbody>
+                        </table>
+                    </div>
+
+                    <p id="dashboard-message" class="message"></p>
+
+                </div>
+
+            </section>
+
+            
+            <!-- TASK BUILDER -->
+            <section id="page-builder" class="page">
+
+                <div class="page-header">
+                    <div>
+                        <h1>Create Task</h1>
+                        <p>Настройка вычислительного процесса</p>
+                    </div>
+
+                    <div class="builder-actions">
+                        <button
+                            type="button"
+                            id="reset-builder"
+                            class="secondary-button"
+                        >
+                            Reset
+                        </button>
+
+                        <button
+                            type="submit"
+                            form="task-form"
+                            class="primary-button"
+                        >
+                            Create Task
+                        </button>
+                    </div>
+                </div>
+
+                <form id="task-form" class="builder-form">
+
+                    <div class="builder-layout">
+
+                        <!-- Левая рабочая область -->
+                        <div class="builder-main">
+
+                            <!-- Конструктор -->
+                            <div class="panel builder-workspace">
+
+                                <div class="builder-heading">
+
+                                    <div class="builder-heading-icon">◎</div>
+
+                                    <div>
+                                        <h2>Calculate Risks</h2>
+                                        <p>
+                                            Configure what to calculate
+                                            and on what data
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <!-- Блоки конструктора -->
+                                <div class="builder-blocks">
+
+                                    <div class="keyword-block">
+                                        <span>▦</span>
+                                        calculate
+                                    </div>
+
+                                    <!-- Выбор типа риска -->
+                                    <button
+                                        type="button"
+                                        id="risk-slot"
+                                        class="builder-slot risk-slot"
+                                    >
+                                        <span class="slot-icon">+</span>
+
+                                        <strong id="risk-slot-title">
+                                            Choose risk type
+                                        </strong>
+
+                                        <span class="slot-hint">
+                                            Select calculation
+                                        </span>
+                                    </button>
+
+                                    <div class="keyword-block">
+                                        in
+                                    </div>
+
+                                    <!-- Выбор источников -->
+                                    <button
+                                        type="button"
+                                        id="sources-slot"
+                                        class="builder-slot sources-slot"
+                                    >
+                                        <span class="slot-icon">+</span>
+
+                                        <strong id="sources-slot-title">
+                                            Select data sources
+                                        </strong>
+
+                                        <span class="slot-hint">
+                                            Click or drop here
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                                <!-- Меню выбора типа риска -->
+                                <div id="risk-options" hidden></div>
+
+                                <!-- Меню выбора источников -->
+                                <div id="source-options" hidden></div>
+
+                                <!-- Предварительный просмотр -->
+                                <div class="task-preview">
+
+                                    <h3>◉ Task Preview</h3>
+
+                                    <div class="preview-expression">
+
+                                        <span class="preview-keyword">
+                                            calculate
+                                        </span>
+
+                                        <span
+                                            id="preview-risk"
+                                            class="preview-value"
+                                        >
+                                            [risk type]
+                                        </span>
+
+                                        <span class="preview-keyword">
+                                            in
+                                        </span>
+
+                                        <span
+                                            id="preview-sources"
+                                            class="preview-value"
+                                        >
+                                            [data sources]
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Каталог источников -->
+                            <div class="panel source-library">
+
+                                <div class="panel-header">
+                                    <h2>Available Data Sources</h2>
+                                </div>
+
+                                <p class="library-description">
+                                    Select or drag a data source into
+                                    the task constructor.
+                                </p>
+
+                                <div
+                                    id="source-library"
+                                    class="source-grid"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Правая панель свойств -->
+                        <aside class="panel task-properties">
+
+                            <h2>Task Properties</h2>
+
+                            <div class="form-field">
+                                <label for="business-date">
+                                    Business date
+                                </label>
+
+                                <input
+                                    id="business-date"
+                                    type="date"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="trigger-type">
+                                    Trigger type
+                                </label>
+
+                                <select id="trigger-type">
+                                    <option value="MANUAL">
+                                        Manual
+                                    </option>
+
+                                    <option value="SCHEDULED">
+                                        Scheduled
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="properties-divider"></div>
+
+                            <div class="configuration-status">
+
+                                <h3>Task configuration</h3>
+
+                                <div id="risk-check">
+                                    ○ Risk type required
+                                </div>
+
+                                <div id="sources-check">
+                                    ○ Select data sources
+                                </div>
+
+                            </div>
+
+                        </aside>
+
+                    </div>
+
+                    <!-- Временные поля для совместимости с app.js -->
+
+                    <p id="message" class="message" role="status"></p>
+
+                </form>
+
+            </section>
+
+
+            
+            <!-- QUEUE -->
+            <section id="page-queue" class="page">
+
+                <div class="page-header">
+                    <div>
+                        <h1>Task Queue</h1>
+                        <p>Monitor active calculation processes</p>
+                    </div>
+                </div>
+
+                <!-- Статистика очереди -->
+                <div class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-label">Active tasks</div>
+                        <div class="stat-value" id="queue-total">—</div>
+                        <div class="stat-description">Всего активных задач</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Running</div>
+                        <div class="stat-value blue" id="queue-running">—</div>
+                        <div class="stat-description">Выполняются</div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">Waiting</div>
+                        <div class="stat-value yellow" id="queue-waiting">—</div>
+                        <div class="stat-description">Ожидают выполнения</div>
+                    </article>
+
+                </div>
+
+                <!-- Выполняющиеся задачи -->
+                <div class="panel queue-panel">
+
+                    <div class="panel-header">
+                        <div class="queue-panel-title">
+                            <span class="queue-indicator running"></span>
+                            <h2>Running tasks</h2>
+                        </div>
+
+                        <span
+                            id="running-count"
+                            class="queue-count"
+                        ></span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Started at</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="running-table"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- Ожидающие задачи -->
+                <div class="panel queue-panel">
+
+                    <div class="panel-header">
+                        <div class="queue-panel-title">
+                            <span class="queue-indicator waiting"></span>
+                            <h2>Waiting queue</h2>
+                        </div>
+
+                        <span
+                            id="waiting-count"
+                            class="queue-count"
+                        ></span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Created at</th>
+                                    <th>Status</th>
+                                    <th>Blocked by</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="waiting-table"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <p id="queue-message" class="message" role="status"></p>
+
+            </section>
+
+            <!-- HISTORY -->
+            <section id="page-history" class="page">
+
+                <div class="page-header">
+                    <div>
+                        <h1>History</h1>
+                        <p>История выполнения задач</p>
+                    </div>
+
+                    <div class="history-filters" style="display: flex; gap: 8px;">
+                        <button type="button" class="secondary-button active" data-history-filter="ALL">Все</button>
+                        <button type="button" class="secondary-button" data-history-filter="COMPLETED">Completed</button>
+                        <button type="button" class="secondary-button" data-history-filter="FAILED">Failed</button>
+                    </div>
+                </div>
+
+                <div id="history-message" class="message"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Completed & Failed tasks</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Process</th>
+                                    <th>Business date</th>
+                                    <th>Sources</th>
+                                    <th>Trigger</th>
+                                    <th>Duration</th>
+                                    <th>Finished at</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RESOURCES -->
+            <section id="page-resources" class="page">
+
+                <div class="page-header">
+                    <div>
+                        <h1>Resources</h1>
+                        <p>Управление ресурсами и конфликтами</p>
+                    </div>
+                </div>
+
+                <div id="resources-message" class="message"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Data sources status</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Resources</th>
+                                    <th>Status</th>
+                                    <th>Owner</th>
+                                    <th>Waiting tasks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resources-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- TASK DETAILS -->
+<dialog
+    id="task-details"
+    class="task-details"
+    aria-labelledby="details-title"
+>
+    <header class="details-header">
+        <div>
+            <h2 id="details-title">Task Details</h2>
+            <p>Calculation process information</p>
+        </div>
+
+        <button
+            type="button"
+            id="details-close"
+            class="details-close"
+            aria-label="Close task details"
+        >
+            ×
+        </button>
+    </header>
+
+    <div class="details-body">
+
+        <p id="details-message" class="message" role="status"></p>
+
+        <form id="details-edit-form" class="details-edit-form" hidden>
+
+            <h2>Edit Task</h2>
+
+            <p class="edit-description">
+                Modify the configuration of a queued task.
+            </p>
+
+            <label class="form-field">
+                Process type
+
+                <select id="edit-process" required>
+                    <option value="credit">Credit Risks</option>
+                    <option value="market">Market Risks</option>
+                    <option value="operational">Operational Risks</option>
+                </select>
+            </label>
+
+            <label class="form-field">
+                Business date
+
+                <input id="edit-date" type="date" required>
+            </label>
+
+
+
+            <label class="form-field">
+                Trigger type
+
+                <select id="edit-trigger" required>
+                    <option value="MANUAL">Manual</option>
+                    <option value="SCHEDULED">Scheduled</option>
+                </select>
+            </label>
+
+            <div class="form-field">
+                Data sources
+
+                <div id="edit-sources" class="edit-sources"></div>
+            </div>
+
+            <div class="edit-actions">
+
+                <button
+                    type="button"
+                    id="edit-cancel"
+                    class="secondary-button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="edit-save"
+                    class="primary-button"
+                >
+                    Save changes
+                </button>
+
+            </div>
+
+        </form>
+
+        <div id="details-content" hidden>
+            <div class="details-management">
+
+                <button
+                    type="button"
+                    id="details-delete"
+                    class="danger-button"
+                    hidden
+                >
+                    Delete task
+                </button>
+
+                <button
+                    type="button"
+                    id="details-edit"
+                    class="primary-button"
+                    hidden
+                >
+                    Edit task
+                </button>
+
+            </div>
+            <!-- Основная информация -->
+            <section class="details-section">
+
+                <div class="details-summary">
+                    <h2 id="details-process-name">—</h2>
+                    <span id="details-status" class="status">—</span>
+                </div>
+
+                <div class="details-field">
+                    <span class="details-label">Task ID</span>
+                    <span id="details-id" class="details-id">—</span>
+                </div>
+
+                <div class="details-grid">
+
+                    <div class="details-field">
+                        <span class="details-label">Business date</span>
+                        <strong id="details-date">—</strong>
+                    </div>
+
+
+                    <div class="details-field">
+                        <span class="details-label">Trigger type</span>
+                        <strong id="details-trigger">—</strong>
+                    </div>
+
+                    <div class="details-field">
+                        <span class="details-label">Process type</span>
+                        <strong id="details-process">—</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Источники данных -->
+            <section class="details-section">
+
+                <h3>Data Sources</h3>
+
+                <div
+                    id="details-sources"
+                    class="details-sources"
+                ></div>
+
+            </section>
+
+            <!-- Время выполнения -->
+            <section class="details-section">
+
+                <h3>Execution Timeline</h3>
+
+                <div
+                    id="details-timeline"
+                    class="details-timeline"
+                ></div>
+
+            </section>
+
+            <!-- Информация об ошибке -->
+            <section
+                id="details-error-section"
+                class="details-section"
+                hidden
+            >
+                <h3>Execution Error</h3>
+
+                <div
+                    id="details-error"
+                    class="details-error"
+                ></div>
+            </section>
+
+        </div>
+
+    </div>
+
+    <footer class="details-footer">
+
+        <button
+            type="button"
+            id="details-refresh"
+            class="secondary-button"
+        >
+            Refresh
+        </button>
+
+        <button
+            type="button"
+            id="details-close-footer"
+            class="primary-button"
+        >
+            Close
+        </button>
+
+    </footer>
+
+</dialog>
+
+<script type="module" src="/static/js/app.js"></script>
+
+</body>
+</html>
