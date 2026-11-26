@@ -68,9 +68,7 @@ async def test_separate_tasks_run_parallel_while_dependent_task_wait(test_engine
         tasks = session.exec(select(Task)).all()
         print("\n--- РЕЗУЛЬТАТЫ ---")
         for t in tasks:
-            if t.id==task_b_id:
+            if t.id == task_b_id:
                 assert t.status == "QUEUED"
-            else: 
+            else:
                 assert t.status == "COMPLETED"
-
-
