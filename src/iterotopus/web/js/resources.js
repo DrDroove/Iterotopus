@@ -89,7 +89,7 @@ function renderResourcesTable(tasks) {
             createCell(sourceName),
             createStatusCell(isLocked),
             createCell(ownerText),
-            createCell(waitingText, "queue-priority")
+            createCell(waitingText, "resource-waiting-count")
         );
 
         table.appendChild(row);

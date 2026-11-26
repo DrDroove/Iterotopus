@@ -141,7 +141,6 @@
                                     <th>Process</th>
                                     <th>Business date</th>
                                     <th>Sources</th>
-                                    <th>Priority</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -337,24 +336,6 @@
                             </div>
 
                             <div class="form-field">
-                                <label for="priority">
-                                    Priority
-                                </label>
-
-                                <input
-                                    id="priority"
-                                    type="number"
-                                    value="0"
-                                    step="1"
-                                    required
-                                >
-
-                                <span class="field-hint">
-                                    Higher value means higher priority
-                                </span>
-                            </div>
-
-                            <div class="form-field">
                                 <label for="trigger-type">
                                     Trigger type
                                 </label>
@@ -456,7 +437,6 @@
                                     <th>Process</th>
                                     <th>Business date</th>
                                     <th>Sources</th>
-                                    <th>Priority</th>
                                     <th>Started at</th>
                                     <th>Status</th>
                                 </tr>
@@ -492,7 +472,6 @@
                                     <th>Process</th>
                                     <th>Business date</th>
                                     <th>Sources</th>
-                                    <th>Priority</th>
                                     <th>Created at</th>
                                     <th>Status</th>
                                     <th>Blocked by</th>
@@ -646,11 +625,7 @@
                 <input id="edit-date" type="date" required>
             </label>
 
-            <label class="form-field">
-                Priority
 
-                <input id="edit-priority" type="number" step="1" required>
-            </label>
 
             <label class="form-field">
                 Trigger type
@@ -731,10 +706,6 @@
                         <strong id="details-date">—</strong>
                     </div>
 
-                    <div class="details-field">
-                        <span class="details-label">Priority</span>
-                        <strong id="details-priority">—</strong>
-                    </div>
 
                     <div class="details-field">
                         <span class="details-label">Trigger type</span>

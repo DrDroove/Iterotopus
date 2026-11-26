@@ -34,7 +34,6 @@ const editSave = document.getElementById("edit-save");
 
 const editProcess = document.getElementById("edit-process");
 const editDate = document.getElementById("edit-date");
-const editPriority = document.getElementById("edit-priority");
 const editTrigger = document.getElementById("edit-trigger");
 const editSources = document.getElementById("edit-sources");
 
@@ -239,7 +238,6 @@ function renderTask(task) {
 
     setText("details-process", task.process_type);
     setText("details-date", task.business_date);
-    setText("details-priority", task.priority);
     setText("details-trigger", task.trigger_type);
 
     renderStatus(task.status);
@@ -437,7 +435,6 @@ function startEditing() {
 
     editProcess.value = currentTask.process_type;
     editDate.value = currentTask.business_date;
-    editPriority.value = currentTask.priority;
     editTrigger.value = currentTask.trigger_type;
 
     renderEditSources(currentTask.sources);
@@ -466,7 +463,6 @@ function buildUpdateData() {
     const data = {
         process_type: editProcess.value,
         business_date: editDate.value,
-        priority: Number(editPriority.value),
         trigger_type: editTrigger.value,
         sources: sources
     };
@@ -479,12 +475,6 @@ function buildUpdateData() {
         throw new Error("Select a business date");
     }
 
-    if (
-        editPriority.value.trim() === "" ||
-        !Number.isSafeInteger(data.priority)
-    ) {
-        throw new Error("Priority must be an integer");
-    }
 
     if (sources.length === 0) {
         throw new Error("Select at least one data source");
@@ -495,7 +485,6 @@ function buildUpdateData() {
     for (const key of [
         "process_type",
         "business_date",
-        "priority",
         "trigger_type"
     ]) {
         if (data[key] !== currentTask[key]) {

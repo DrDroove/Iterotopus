@@ -16,7 +16,6 @@ def test_independet_tasks_acquire_resources(session, client):
             "process_type": "credit",
             "business_date": "2026-11-20",
             "sources": ["transactions"],
-            "priority": 1,
             "trigger_type": "MANUAL",
         },
     )
@@ -29,7 +28,6 @@ def test_independet_tasks_acquire_resources(session, client):
             "process_type": "credit",
             "business_date": "2026-11-21",
             "sources": ["market_data"],
-            "priority": 1,
             "trigger_type": "MANUAL",
         },
     )
@@ -52,7 +50,6 @@ def test_conflict_rolls_back_partial_acquire(session, client):
             "process_type": "credit",
             "business_date": "2026-11-20",
             "sources": ["transactions"],
-            "priority": 1,
             "trigger_type": "MANUAL",
         },
     )
@@ -65,7 +62,6 @@ def test_conflict_rolls_back_partial_acquire(session, client):
             "process_type": "credit",
             "business_date": "2026-11-21",
             "sources": ["transactions", "market_data"],
-            "priority": 1,
             "trigger_type": "MANUAL",
         },
     )
@@ -96,7 +92,6 @@ def test_release_after_success(session, client):
             "process_type": "credit",
             "business_date": "2026-11-20",
             "sources": ["transactions"],
-            "priority": 1,
             "trigger_type": "MANUAL",
         },
     )

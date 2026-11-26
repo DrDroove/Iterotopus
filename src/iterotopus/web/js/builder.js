@@ -422,8 +422,6 @@ function buildTaskData() {
 
         sources: [...state.sources],
 
-        priority:
-            Number(document.getElementById("priority").value),
 
         trigger_type:
             document.getElementById("trigger-type").value
@@ -443,9 +441,6 @@ function validateTask(data) {
         throw new Error("Укажите расчётную дату");
     }
 
-    if (!Number.isInteger(data.priority)) {
-        throw new Error("Приоритет должен быть целым числом");
-    }
 }
 
 form.addEventListener("submit", async event => {

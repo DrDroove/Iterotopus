@@ -176,7 +176,6 @@ function renderRecentTasks(tasks) {
             createCell(task.sources.join(", "))
         );
 
-        row.appendChild(createCell(task.priority));
 
         row.appendChild(createStatusCell(task, tasks));
 
@@ -186,7 +185,7 @@ function renderRecentTasks(tasks) {
 
 function getTasksSignature(tasks) {
     return tasks
-        .map((t) => `${t.id}:${t.status}:${t.priority}:${t.finished_at ?? ""}`)
+        .map((t) => `${t.id}:${t.status}:${t.finished_at ?? ""}`)
         .join("|");
 }
 
