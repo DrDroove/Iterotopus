@@ -15,8 +15,6 @@ class Task(SQLModel, table=True):
 
     status: str = Field(default="QUEUED", max_length=20)
 
-    priority: int = Field(default=0)
-
     trigger_type: str = Field(default="MANUAL", max_length=20)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

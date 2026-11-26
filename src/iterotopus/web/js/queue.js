@@ -106,9 +106,6 @@ function splitTasks(tasks) {
     const waiting = tasks
         .filter(task => task.status === "QUEUED")
         .sort((a, b) => {
-            if (a.priority !== b.priority) {
-                return b.priority - a.priority;
-            }
 
             return new Date(a.created_at) -
                    new Date(b.created_at);
@@ -173,10 +170,6 @@ function renderRunningTasks(tasks) {
 
             createCell(task.sources.join(", ")),
 
-            createCell(
-                task.priority,
-                "queue-priority"
-            ),
 
             createCell(
                 formatDateTime(task.started_at),
@@ -236,10 +229,6 @@ function renderWaitingTasks(waitingTasks, runningTasks) {
 
             createCell(task.sources.join(", ")),
 
-            createCell(
-                task.priority,
-                "queue-priority"
-            ),
 
             createCell(
                 formatDateTime(task.created_at),

@@ -56,7 +56,7 @@ class Scheduler:
             queued = session.exec(
                 select(Task)
                 .where(Task.status == "QUEUED")
-                .order_by(Task.priority.desc(), Task.created_at.asc())
+                .order_by(Task.created_at.asc(), Task.id.asc())
             ).all()
 
             for task in queued:

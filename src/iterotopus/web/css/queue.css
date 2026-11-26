@@ -45,7 +45,7 @@
     font-size: 13px;
 }
 
-.queue-priority {
+.resource-waiting-count {
     color: #c7d2fe;
     font-weight: 600;
 }
