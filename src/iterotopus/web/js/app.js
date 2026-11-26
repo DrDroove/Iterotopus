@@ -1,5 +1,7 @@
 import { loadDashboard } from "./dashboard.js";
 import { loadQueue } from "./queue.js";
+import { loadResources } from "./resources.js";
+import { loadHistory, initHistoryFilters } from "./history.js";
 import { openTaskDetails } from "./task-details.js";
 import "./builder.js";
 
@@ -43,6 +45,12 @@ function showPage(pageName) {
     }
     if (pageName === "queue") {
     refreshQueue();
+    }
+    if (pageName === "history") {
+        refreshHistory();
+    }
+    if (pageName === "resources") {
+        refreshResources();
     }
 }
 
@@ -98,21 +106,34 @@ async function refreshQueue() {
     }
 }
 
+async function refreshHistory() {
+    try {
+        await loadHistory();
+        setConnection(true);
+    } catch (error) {
+        setConnection(false);
+        console.error(error);
+    }
+}
+
+async function refreshResources() {
+    try {
+        await loadResources();
+        setConnection(true);
+    } catch (error) {
+        setConnection(false);
+        console.error(error);
+    }
+}
+
+initHistoryFilters();
+
 // События приложения
 
 document.addEventListener(
     "task:created",
     refreshDashboard
 );
-
-// Ручное обновление
-
-document.getElementById("refresh-button")
-    .addEventListener("click", refreshDashboard);
-
-
-document.getElementById("queue-refresh")
-    .addEventListener("click", refreshQueue);
     
 // Инициализация приложения
 
@@ -156,3 +177,15 @@ document.addEventListener("task:deleted", () => {
 });
 
 showPage("dashboard");
+
+document.addEventListener("task:updated", () => {
+    refreshDashboard();
+    refreshQueue();
+    refreshHistory();
+});
+
+document.addEventListener("task:deleted", () => {
+    refreshDashboard();
+    refreshQueue();
+    refreshHistory();
+});
