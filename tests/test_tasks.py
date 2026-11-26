@@ -6,7 +6,6 @@ def make_task_data():
         "process_type": "credit",
         "business_date": "2026-11-20",
         "sources": ["transactions"],
-        "priority": 1,
         "trigger_type": "MANUAL",
     }
 
@@ -58,15 +57,15 @@ def test_update_task(client):
 
     response = client.patch(
         f"/api/v1/tasks/{created['id']}",
-        json={"priority": 5},
+        json={"trigger_type": "SCHEDULED"},
     )
 
     assert response.status_code == 200
-    assert response.json()["priority"] == 5
+    assert response.json()["trigger_type"] == "SCHEDULED"
 
     saved = client.get(f"/api/v1/tasks/{created['id']}").json()
 
-    assert saved["priority"] == 5
+    assert saved["trigger_type"] == "SCHEDULED"
 
 
 def test_update_task_sources(client):
